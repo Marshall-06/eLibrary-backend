@@ -102,11 +102,10 @@ const Category = sequelize.define("Category", {
 
 const Audiobook = sequelize.define('Audiobook', {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    title: { type: DataTypes.STRING, allowNull: false },
+    name: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT },
-    author: { type: DataTypes.STRING },
-    category: { type: DataTypes.STRING },
-    audio: { type: DataTypes.STRING } // stored filename
+    audio: {type: DataTypes.STRING},
+    categoryId: { type: DataTypes.INTEGER }
   }, {
     timestamps: true
   });
@@ -115,6 +114,9 @@ const Audiobook = sequelize.define('Audiobook', {
 // **Define Associations**
 Category.hasMany(Book, { foreignKey: "categoryId", as: "books" });
 Book.belongsTo(Category, { foreignKey: "categoryId", as: "category" });
+
+Category.hasMany(Audiobook, { foreignKey: 'categoryId' });
+Audiobook.belongsTo(Category, { foreignKey: 'categoryId' });
 
 module.exports = {
     User,

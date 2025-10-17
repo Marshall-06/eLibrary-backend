@@ -6,6 +6,7 @@ const PORT = process.env.PORT
 const authRouter = require('./routes/authRouter')
 const bookRouter = require('./routes/bookRouter')
 const categoryRouter = require('./routes/categoryRouter')
+const audioRouter = require("./routes/audioRouter")
 
 
 const sequelize = require("./data/db")
@@ -21,9 +22,11 @@ app.use("/uploads", express.static("uploads"));
 
 
 
-app.use('/auth', authRouter);
-app.use('/book', bookRouter);
-app.use('/category', categoryRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/book', bookRouter);
+app.use('/api/category', categoryRouter);
+app.use('/api/audio', audioRouter);
+
 
 
 app.use("/api/v1/auth", authRouter);

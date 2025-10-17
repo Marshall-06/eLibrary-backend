@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const multer = require("multer");
 const path = require("path");
 const fs = require('fs');
 const { Book, Category } = require('../models/model');
-const upload = require("../middlewares/upload");
-const {authMiddleware, adminOnly} = require ("../middlewares/authMiddleware")
+const pdfUpload = require("../middlewares/pdf");
+// const {authMiddleware, adminOnly} = require ("../middlewares/authMiddleware")
 
 router.get("/", async (req, res) => {
   const books = await Book.findAll();
@@ -21,8 +20,8 @@ router.get("/single/:id", async (req, res) => {
 })
 
 router.post(
-  "/create",authMiddleware,adminOnly,
-  upload.fields([{ name: "image" }, { name: "pdf" }]),
+  "/create",
+  pdfUpload.fields([{ name: "image" }, { name: "pdf" }]),
   async (req, res) => {
     const { name, description, categoryId } = req.body;
 
@@ -73,7 +72,7 @@ router.post(
 
 
 
-router.put("/update/:id", upload.fields([{ name: "pdf" }, { name: "image" }]), async (req, res) => {
+router.put("/update/:id", pdfUpload.fields([{ name: "pdf" }, { name: "image" }]), async (req, res) => {
   const book = await Book.findByPk(req.params.id);
   if (!book) {
     return res.status(404).json({ error: "Book not found" });
@@ -118,7 +117,7 @@ router.get('/download/:id', async (req, res) => {
     if (!book) return res.status(404).json({ message: 'Book not found' });
 
     const sourcePath = path.join(__dirname, '..', 'uploads', 'pdfs', book.pdf);
-    const destDir = path.join(__dirname, '..', 'storage'); // folder inside app
+    const destDir = path.join(__dirname, "..", "storage", "pdfs"); // folder inside app
     if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
 
     const destPath = path.join(destDir, book.pdf);
