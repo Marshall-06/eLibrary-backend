@@ -7,6 +7,9 @@ const authRouter = require('./routes/authRouter')
 const bookRouter = require('./routes/bookRouter')
 const categoryRouter = require('./routes/categoryRouter')
 const audioRouter = require("./routes/audioRouter")
+const highlightRouter = require("./routes/highlightRouter")
+const savedQuoteRoutes = require("./routes/savedQuoteRoutes");
+const myLibrary = require("./routes/myLibraryRouter");
 
 
 const sequelize = require("./data/db")
@@ -26,6 +29,11 @@ app.use('/api/auth', authRouter);
 app.use('/api/book', bookRouter);
 app.use('/api/category', categoryRouter);
 app.use('/api/audio', audioRouter);
+app.use("/api/highlight", highlightRouter);
+app.use("/api/quote", savedQuoteRoutes);
+app.use("/api/library", myLibrary);
+
+
 
 
 
