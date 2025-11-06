@@ -23,9 +23,9 @@ exports.getSingleBook = async (req, res) => {
 };
 
 exports.createBook = async (req, res) => {
-  const { name, description, categoryId, userId } = req.body;
+  const { name, description, categoryId, userId, author } = req.body;
 
-  if (!name || !description || !categoryId || !userId) {
+  if (!name || !description || !categoryId || !userId || !author) {
     return res.status(400).json({ error: "Name, Description, and Category are required" });
   }
 
@@ -46,6 +46,7 @@ exports.createBook = async (req, res) => {
       description,
       categoryId,
       userId,
+      author,
       image: req.files.image[0].filename,
       pdf: req.files.pdf[0].filename,
     });
@@ -58,6 +59,7 @@ exports.createBook = async (req, res) => {
         description: book.description,
         categoryId: book.categoryId,
         userId: book.userId,
+        author: book.author,
         image: `${fileBaseUrl}/${book.image}`,
         pdf: `${fileBaseUrl}/${book.pdf}`,
         createdAt: book.createdAt,
@@ -74,8 +76,8 @@ exports.updateBook = async (req, res) => {
     const book = await Book.findByPk(req.params.id);
     if (!book) return res.status(404).json({ error: "Book not found" });
 
-    const { name, description, categoryId, userId } = req.body;
-    if (!name || !description || !userId)  {
+    const { name, description, categoryId, userId, author } = req.body;
+    if (!name || !description || !userId || !author)  {
       return res.status(400).json({ error: "Name and Description are required" });
     }
 
@@ -91,6 +93,7 @@ exports.updateBook = async (req, res) => {
     book.name = name;
     book.description = description;
     book.userId = userId;
+    book.author = author;
     book.categoryId = categoryId || book.categoryId;
 
     await book.save();

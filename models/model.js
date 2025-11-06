@@ -23,6 +23,7 @@ const Book = sequelize.define("Book", {
     },
     userId: {type: DataTypes.INTEGER,allowNull: false},
     name: { type: DataTypes.STRING, allowNull: false },
+    author: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT, allowNull: false },
     image: { type: DataTypes.STRING, allowNull: false },
     pdf: { type: DataTypes.STRING, allowNull: false },
@@ -84,6 +85,7 @@ const Audiobook = sequelize.define('Audiobook', {
     name: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT },
     audio: {type: DataTypes.STRING},
+    author: { type: DataTypes.STRING, allowNull: false },
     categoryId: { type: DataTypes.INTEGER }
   }, {
     timestamps: true

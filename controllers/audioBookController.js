@@ -7,9 +7,9 @@ const { Op } = require("sequelize");
 
 exports.createAudiobook = async (req, res) => {
   try {
-    const { name, description, categoryId, userId } = req.body;
+    const { name, description, categoryId, userId, author } = req.body;
 
-    if (!name || !description || !categoryId || !userId) {
+    if (!name || !description || !categoryId || !userId || !author) {
       return res.status(400).json({
         error: "Title, Description, and Category are required",
       });
@@ -30,6 +30,7 @@ exports.createAudiobook = async (req, res) => {
       name,
       description,
       categoryId,
+      author,
       userId: req.user.id,
       audio: req.file.filename,
     });
@@ -40,6 +41,7 @@ exports.createAudiobook = async (req, res) => {
         id: audiobook.id,
         name: audiobook.name,
         description: audiobook.description,
+        author: audiobook.author,
         categoryId: audiobook.categoryId,
         audio: `${fileBaseUrl}/${audiobook.audio}`,
         createdAt: audiobook.createdAt,
@@ -99,7 +101,7 @@ exports.downloadAudiobook = async (req, res) => {
 exports.updateAudiobook = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, categoryId,userId } = req.body;
+    const { name, description, categoryId,userId,author } = req.body;
 
     const audioBook = await Audiobook.findByPk(id);
     if (!audioBook) return res.status(404).json({ message: "Audiobook not found" });
@@ -113,6 +115,7 @@ exports.updateAudiobook = async (req, res) => {
     if (name) audioBook.name = name;
     if (description) audioBook.description = description;
     if (userId) audioBook.userId = userId;
+    if (author) audioBook.author = author;
 
     if (req.file) {
       const oldFile = path.join(__dirname, "..", "uploads", "audios", audioBook.audio);
@@ -130,6 +133,7 @@ exports.updateAudiobook = async (req, res) => {
         name: audioBook.name,
         description: audioBook.description,
         userId: audioBook.userId,
+        author: audioBook.author,
         categoryId: audioBook.categoryId,
         audio: `${fileBaseUrl}/${audioBook.audio}`,
         updatedAt: audioBook.updatedAt,
