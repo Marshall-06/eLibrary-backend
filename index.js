@@ -1,7 +1,6 @@
 const express = require("express")
 require('dotenv').config();
 const bodyParser = require('body-parser');
-const cookieParser = require("cookie-parser");
 const PORT = process.env.PORT
 const authRouter = require('./routes/authRouter')
 const bookRouter = require('./routes/bookRouter')
@@ -10,6 +9,7 @@ const audioRouter = require("./routes/audioRouter")
 const highlightRouter = require("./routes/highlightRouter")
 const savedQuoteRoutes = require("./routes/savedQuoteRoutes");
 const myLibrary = require("./routes/myLibraryRouter");
+const profileRouter = require("./routes/profileRouter");
 
 
 const sequelize = require("./data/db")
@@ -32,6 +32,8 @@ app.use('/api/audio', audioRouter);
 app.use("/api/highlight", highlightRouter);
 app.use("/api/quote", savedQuoteRoutes);
 app.use("/api/library", myLibrary);
+app.use("/api/profile", profileRouter);
+
 
 
 

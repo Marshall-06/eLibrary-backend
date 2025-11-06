@@ -10,7 +10,6 @@ exports.saveQuote = async (req, res) => {
       return res.status(400).json({ error: "userId, bookId, and text are required" });
     }
 
-    // Step 1: Save to database
     const saved = await SavedQuote.create({
       userId,
       bookId,
@@ -18,15 +17,12 @@ exports.saveQuote = async (req, res) => {
       pageNumber,
     });
 
-    // Step 2: Save to storage folder as text file
     const storageDir = path.join(__dirname, "..", "storage", "quotes");
 
-    // Ensure folder exists
     if (!fs.existsSync(storageDir)) {
       fs.mkdirSync(storageDir, { recursive: true });
     }
 
-    // Example: storage/quotes/user_1_quote_5.txt
     const fileName = `user_${userId}_quote_${saved.id}.txt`;
     const filePath = path.join(storageDir, fileName);
 
@@ -42,8 +38,6 @@ exports.saveQuote = async (req, res) => {
     ].join("\n");
 
     fs.writeFileSync(filePath, fileContent, "utf8");
-
-    // Step 3: Send response
     res.status(201).json({
       message: "Quote saved successfully to database and storage",
       saved,
@@ -85,7 +79,6 @@ exports.getQuoteFile = async (req, res) => {
   try {
     const { userId, quoteId } = req.params;
 
-    // Construct file path
     const filePath = path.join(
       __dirname,
       "..",
@@ -94,12 +87,10 @@ exports.getQuoteFile = async (req, res) => {
       `user_${userId}_quote_${quoteId}.txt`
     );
 
-    // Check if the file exists
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ message: "File not found" });
     }
 
-    // Send the file as a download
     res.download(filePath);
   } catch (err) {
     res.status(500).json({ message: "Error reading quote file", error: err.message });

@@ -10,6 +10,15 @@ const User = sequelize.define("User", {
     },
     name: { type: DataTypes.STRING, allowNull: false },
     phone_num: { type: DataTypes.INTEGER, allowNull: false },
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
+    avatar_img: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     email: {type: DataTypes.STRING,allowNull: false},
     password: { type: DataTypes.STRING, allowNull: false },
     role: { type: DataTypes.ENUM("admin", "user"), defaultValue: "user" }
