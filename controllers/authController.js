@@ -1,8 +1,9 @@
 const User = require("../models/model").User;
 const bcrypt = require("bcrypt");
 const { sign } = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
-// ✅ Admin login (rootman)
+
 exports.adminLogin = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -28,7 +29,6 @@ exports.adminLogin = async (req, res) => {
   }
 };
 
-// ✅ User registration
 exports.register = async (req, res) => {
   const { name, phone_num, password, email, role } = req.body;
   try {
@@ -61,38 +61,95 @@ exports.register = async (req, res) => {
   }
 };
 
-// ✅ User login
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
   try {
+    const { email, password } = req.body;
+
     const user = await User.findOne({ where: { email } });
-    if (!user) {
-      return res
-        .status(400)
-        .json({ error: "Ulanyjynyň nomeri ýa-da açar sözi nädogry" });
-    }
+    if (!user) return res.status(400).json({ message: 'Invalid email or password' });
 
-    const passwordIsValid = bcrypt.compareSync(password, user.password);
-    if (!passwordIsValid) {
-      return res
-        .status(400)
-        .json({ error: "Ulanyjynyň nomeri ýa-da açar sözi nädogry" });
-    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Invalid email or password' });
 
-    const token = sign(
-      {
-        id: user.id,
-        role: user.role,
-        username: user.username,
-        isAdmin: user.isAdmin,
-      },
+    const accessToken = jwt.sign(
+      { id: user.id, role: user.role },
       process.env.JWT_ACCESS_KEY,
-      { expiresIn: "24h" }
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES || '24h' }
     );
 
-    res.json({ token });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error", message: err.message });
+    const refreshToken = jwt.sign(
+      { id: user.id },
+      process.env.JWT_REFRESH_KEY,
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRES || '7d' }
+    );
+
+    user.refresh_token = refreshToken;
+    await user.save();
+
+    res.json({
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        avatar_img: user.avatar_img || null
+      }
+    });
+
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
+exports.refreshToken = async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(401).json({ message: 'Refresh token required' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_KEY);
+    const user = await User.findByPk(decoded.id);
+    if (!user) return res.status(403).json({ message: 'User not found' });
+    if (user.refresh_token !== token)
+      return res.status(403).json({ message: 'Invalid or expired refresh token' });
+
+    const newAccessToken = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_ACCESS_KEY,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES || '24h' }
+    );
+
+    res.json({ accessToken: newAccessToken });
+  } catch (error) {
+    console.error("Refresh error:", error);
+    res.status(403).json({ message: 'Invalid or expired refresh token' });
+  }
+};
+
+
+
+
+
+exports.logout = async (req, res) => {
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ message: 'Token required' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_KEY);
+    const user = await User.findByPk(decoded.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.refresh_token = null;
+    await user.save();
+
+    res.json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: 'Invalid token' });
   }
 };
